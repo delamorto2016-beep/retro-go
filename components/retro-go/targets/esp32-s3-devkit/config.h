@@ -1,7 +1,6 @@
 #pragma once
 
-// Название прошивки под твое железо
-#define RG_TARGET_NAME "SUPERMINI-ST7789V"
+
 
 // Аппаратная конфигурация чипа SuperMini с 2MB PSRAM
 #define CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG 1 // Включаем USB для логов, чтобы чип не вис
