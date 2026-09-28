@@ -14,17 +14,16 @@ jobs:
       with:
         submodules: 'recursive' # Автоматически скачиваем все встроенные библиотеки
 
-    # Устанавливаем официальный компилятор ESP-IDF версии 5.1 (идеален для S3 в retro-go)
+    # Устанавливаем официальный компилятор ESP-IDF версии 5.1
     - name: Install ESP-IDF
       uses: espressif/install-esp-idf-action@v1
       with:
         version: 'v5.1.2'
-        path: 'esp-idf'
 
-    # Принудительно настраиваем сборку строго под чип ESP32-S3
+    # Компиляция проекта под чип ESP32-S3 (используем встроенную команду $IDF_PATH)
     - name: Build Firmware for ESP32-S3
       run: |
-        . $HOME/esp/esp-idf/export.sh
+        . $IDF_PATH/export.sh
         idf.py set-target esp32s3
         idf.py build
 
