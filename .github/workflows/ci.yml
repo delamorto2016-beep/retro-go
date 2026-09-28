@@ -14,22 +14,21 @@ jobs:
       with:
         submodules: 'recursive' # Скачиваем все встроенные библиотеки ядра
 
-    # Запускаем официальный изолированный контейнер со всей средой разработки ESP-IDF v5.1
+    # Запускаем официальный контейнер ESP-IDF и принудительно заходим в папку launcher
     - name: Build with ESP-IDF Docker
       run: |
-        docker run --rm -v ${{ github.workspace }}:/project -w /project espressif/idf:release-v5.1 sh -c "
+        docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
           idf.py set-target esp32s3
           idf.py build
         "
 
-    # Собираем все полученные раздельные .bin файлы
+    # Собираем все полученные бинарники из папки launcher/build
     - name: Collect Binaries
       run: |
         mkdir -p build_out
-        cp build/bootloader/bootloader.bin build_out/ 2>/dev/null || true
-        cp build/partition_table/partition-table.bin build_out/ 2>/dev/null || true
-        cp build/retro-go.bin build_out/ 2>/dev/null || true
-        cp build/launcher.bin build_out/ 2>/dev/null || true
+        cp launcher/build/bootloader/bootloader.bin build_out/ 2>/dev/null || true
+        cp launcher/build/partition_table/partition-table.bin build_out/ 2>/dev/null || true
+        cp launcher/build/launcher.bin build_out/ 2>/dev/null || true
         echo "=== Сгенерированные файлы прошивки под ESP32-S3 ==="
         ls -la build_out
 
