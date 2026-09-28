@@ -1,4 +1,4 @@
-name: ESP-IDF Build
+name: ESP-IDF Docker Build
 
 on:
   workflow_dispatch:      # Позволяет запускать сборку вручную кнопкой Run workflow
@@ -12,20 +12,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: 'recursive' # Автоматически скачиваем все встроенные библиотеки
+        submodules: 'recursive' # Скачиваем все встроенные библиотеки ядра
 
-    # Устанавливаем официальный компилятор ESP-IDF версии 5.1
-    - name: Install ESP-IDF
-      uses: espressif/install-esp-idf-action@v1
-      with:
-        version: 'v5.1.2'
-
-    # Компиляция проекта под чип ESP32-S3 (используем встроенную команду $IDF_PATH)
-    - name: Build Firmware for ESP32-S3
+    # Запускаем официальный изолированный контейнер со всей средой разработки ESP-IDF v5.1
+    - name: Build with ESP-IDF Docker
       run: |
-        . $IDF_PATH/export.sh
-        idf.py set-target esp32s3
-        idf.py build
+        docker run --rm -v ${{ github.workspace }}:/project -w /project espressif/idf:release-v5.1 sh -c "
+          idf.py set-target esp32s3
+          idf.py build
+        "
 
     # Собираем все полученные раздельные .bin файлы
     - name: Collect Binaries
