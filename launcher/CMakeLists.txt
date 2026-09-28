@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
+set(RG_TARGET esp32s3-devkit-c)
 set(COMPONENTS "main retro-go wifi esp_http_server")
 include(../base.cmake)
 project(launcher)
