@@ -14,11 +14,12 @@ jobs:
       with:
         submodules: 'recursive' # Скачиваем встроенные библиотеки ядра
 
-    # Запускаем контейнер и собираем прошивку, передавая правильную переменную RG_TARGET
+    # Запускаем контейнер, принудительно чистим кэш CMake и собираем проект
     - name: Build with ESP-IDF Docker
       run: |
         docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
           export RG_TARGET=esp32s3-devkit-c
+          idf.py fullclean
           idf.py set-target esp32s3
           idf.py build
         "
