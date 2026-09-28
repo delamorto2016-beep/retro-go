@@ -12,19 +12,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: 'recursive' # Скачиваем встроенные библиотеки ядра
+        submodules: 'recursive' # Скачиваем встроенные библиотеки ядра эмулятора
 
-    # Запускаем контейнер, принудительно чистим кэш CMake и собираем проект
+    # Запускаем контейнер, принудительно вычищаем кэш и собираем лончер
     - name: Build with ESP-IDF Docker
       run: |
         docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
-          export RG_TARGET=esp32s3-devkit-c
           idf.py fullclean
           idf.py set-target esp32s3
           idf.py build
         "
 
-    # Собираем все полученные бинарники из папки launcher/build
+    # Собираем все полученные раздельные .bin файлы из папки сборки лончера
     - name: Collect Binaries
       run: |
         mkdir -p build_out
