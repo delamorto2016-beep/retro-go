@@ -1,7 +1,7 @@
-name: PlatformIO Build
+name: ESP-IDF Build
 
 on:
-  workflow_dispatch:      # Запуск вручную кнопкой Run workflow
+  workflow_dispatch:      # Позволяет запускать сборку вручную кнопкой Run workflow
   push:
 
 jobs:
@@ -11,33 +11,37 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
       with:
-        python-version: '3.x'
+        submodules: 'recursive' # Автоматически скачиваем все встроенные библиотеки
 
-    - name: Install PlatformIO
+    # Устанавливаем официальный компилятор ESP-IDF версии 5.1 (идеален для S3 в retro-go)
+    - name: Install ESP-IDF
+      uses: espressif/install-esp-idf-action@v1
+      with:
+        version: 'v5.1.2'
+        path: 'esp-idf'
+
+    # Принудительно настраиваем сборку строго под чип ESP32-S3
+    - name: Build Firmware for ESP32-S3
       run: |
-        python -m pip install --upgrade pip
-        pip install platformio
+        . $HOME/esp/esp-idf/export.sh
+        idf.py set-target esp32s3
+        idf.py build
 
-    # Запускаем компиляцию проекта под ESP32-S3
-    - name: Run PlatformIO Build
-      run: |
-        pio run
-
-    # Собираем абсолютно все полученные раздельные .bin файлы
+    # Собираем все полученные раздельные .bin файлы
     - name: Collect Binaries
       run: |
         mkdir -p build_out
-        find .pio/ -name "*.bin" -exec cp {} build_out/ \; 2>/dev/null || true
-        echo "=== Сгенерированные файлы прошивки ==="
+        cp build/bootloader/bootloader.bin build_out/ 2>/dev/null || true
+        cp build/partition_table/partition-table.bin build_out/ 2>/dev/null || true
+        cp build/retro-go.bin build_out/ 2>/dev/null || true
+        cp build/launcher.bin build_out/ 2>/dev/null || true
+        echo "=== Сгенерированные файлы прошивки под ESP32-S3 ==="
         ls -la build_out
 
     # Упаковываем файлы в архив для скачивания
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: platformio-binaries
+        name: esp32s3-binaries
         path: build_out/*
