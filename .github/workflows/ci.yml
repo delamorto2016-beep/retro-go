@@ -12,12 +12,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: 'recursive' # Скачиваем все встроенные библиотеки ядра
+        submodules: 'recursive' # Скачиваем встроенные библиотеки ядра
 
-    # Запускаем официальный контейнер ESP-IDF и принудительно заходим в папку launcher
+    # Запускаем контейнер и собираем прошивку, передавая правильную переменную RG_TARGET
     - name: Build with ESP-IDF Docker
       run: |
         docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
+          export RG_TARGET=esp32s3-devkit-c
           idf.py set-target esp32s3
           idf.py build
         "
