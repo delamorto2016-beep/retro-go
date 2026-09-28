@@ -1,7 +1,7 @@
-name: ci
+name: PlatformIO Build
 
 on:
-  workflow_dispatch:      # Start a workflow
+  workflow_dispatch:      # Запуск вручную кнопкой Run workflow
   push:
 
 jobs:
@@ -9,34 +9,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Remove ~18 GiB of preinstalled software to have more disk space during the build
-    - name: Cleanup runner
-      run: |
-        df -h
-        sudo rm -rf /opt/microsoft /usr/local/.ghcup /usr/local/julia* /usr/share/dotnet /usr/share/swift /usr/lib/llvm*
-        df -h
-
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Build
-      uses: docker/build-push-action@v6
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        context: .
-        tags: retro-go:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        load: true
+        python-version: '3.x'
 
-    - name: Extract binaries from docker image
+    - name: Install PlatformIO
       run: |
-        docker run --rm -v $(pwd)/build:/build retro-go:latest sh -c "cp /app/*.fw /build"
+        python -m pip install --upgrade pip
+        pip install platformio
 
+    # Запускаем компиляцию проекта под ESP32-S3
+    - name: Run PlatformIO Build
+      run: |
+        pio run
+
+    # Собираем абсолютно все полученные раздельные .bin файлы
+    - name: Collect Binaries
+      run: |
+        mkdir -p build_out
+        find .pio/ -name "*.bin" -exec cp {} build_out/ \; 2>/dev/null || true
+        echo "=== Сгенерированные файлы прошивки ==="
+        ls -la build_out
+
+    # Упаковываем файлы в архив для скачивания
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: binaries
-        path: build/*.fw
+        name: platformio-binaries
+        path: build_out/*
