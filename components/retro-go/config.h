@@ -32,7 +32,11 @@
 #include "targets/crokpocket/config.h"
 #elif defined(RG_TARGET_REDROID_GO)
 #include "targets/redroid-go/config.h"
+#elif defined(RG_TARGET_SUPERMINI)
+#include "targets/supermini/config.h"
+
 #else
+
 #warning "No target defined. Defaulting to ODROID-GO."
 #include "targets/odroid-go/config.h"
 #define RG_TARGET_ODROID_GO
