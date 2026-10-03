@@ -10,6 +10,7 @@
 #define CONFIG_SPIRAM                       1
 #define CONFIG_SPIRAM_BOOT_INIT            1
 #define CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG 1
+#define RG_SCREEN_SPI_MODE 3
 
 // Настройки накопителя (Используем внутреннюю Flash-память)
 #define RG_STORAGE_DRIVER           4  
