@@ -14,22 +14,29 @@ jobs:
       with:
         submodules: 'recursive' # Скачиваем встроенные библиотеки ядра эмулятора
 
-    # Чистый запуск Docker-контейнера без лишних флагов командной строки
+    # ХАК: Переносим все файлы в папку БЕЗ дефисов, чтобы CMake не генерировал кривые макросы
+    - name: Rename workspace folder to remove dashes
+      run: |
+        cd ..
+        mv retro-go retrogo
+        ln -s retrogo retro-go # Создаем символическую ссылку для совместимости с путями GitHub
+
+    # Запускаем контейнер из папки без дефисов
     - name: Build with ESP-IDF Docker
       run: |
-        docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
+        docker run --rm -v /home/runner/work/retro-go/retrogo:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
           idf.py fullclean
           idf.py set-target esp32s3
           idf.py build
         "
 
-    # Собираем все полученные раздельные .bin файлы из папки сборки лончера
+    # Собираем все полученные раздельные .bin файлы
     - name: Collect Binaries
       run: |
         mkdir -p build_out
-        cp launcher/build/bootloader/bootloader.bin build_out/ 2>/dev/null || true
-        cp launcher/build/partition_table/partition-table.bin build_out/ 2>/dev/null || true
-        cp launcher/build/launcher.bin build_out/ 2>/dev/null || true
+        cp /home/runner/work/retro-go/retrogo/launcher/build/bootloader/bootloader.bin build_out/ 2>/dev/null || true
+        cp /home/runner/work/retro-go/retrogo/launcher/build/partition_table/partition-table.bin build_out/ 2>/dev/null || true
+        cp /home/runner/work/retro-go/retrogo/launcher/build/launcher.bin build_out/ 2>/dev/null || true
         echo "=== Сгенерированные файлы прошивки под ESP32-S3 ==="
         ls -la build_out
 
