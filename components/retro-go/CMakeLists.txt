@@ -18,7 +18,9 @@ component_compile_options(
     -DLODEPNG_NO_COMPILE_ERROR_TEXT
     -Os
     -Wno-unused-function
+    -Wno-error
 )
+
 set_source_files_properties(
     rg_audio.c rg_display.c rg_utils.c rg_surface.c libs/lodepng/lodepng.c
     PROPERTIES COMPILE_FLAGS
