@@ -14,10 +14,11 @@ jobs:
       with:
         submodules: 'recursive' # Скачиваем встроенные библиотеки ядра эмулятора
 
-    # Запускаем контейнер, принудительно вычищаем кэш и собираем лончер
+    # Запускаем контейнер, принудительно задаем таргет supermini без дефисов и собираем
     - name: Build with ESP-IDF Docker
       run: |
         docker run --rm -v ${{ github.workspace }}:/project -w /project/launcher espressif/idf:release-v5.1 sh -c "
+          export RG_TARGET=supermini
           idf.py fullclean
           idf.py set-target esp32s3
           idf.py build
